@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang = 'en'>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Simple calculator with plus, multiply, minus">
+        <link rel="icon" href="Assets/IG.png">
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <title>Sebastian Kościak - Calculator</title>
+    </head>
+    <body>
+        <div id = "kalkulator">
+            <p id = "showresult"></p>
+            <div id = "kalkulator-buttons">
+                <div id = "button-7" class = "buttons"><p>7</p></div>
+                <div id = "button-8" class = "buttons"><p>8</p></div>
+                <div id = "button-9" class = "buttons"><p>9</p></div>
+                <div id = "multiply" class = "buttons"><p>*</p></div>
+                <div id = "button-4" class = "buttons"><p>4</p></div>
+                <div id = "button-5" class = "buttons"><p>5</p></div>
+                <div id = "button-6" class = "buttons"><p>6</p></div>
+                <div id = "plus" class = "buttons"><p>+</p></div>
+                <div id = "button-1" class = "buttons"><p>1</p></div>
+                <div id = "button-2" class = "buttons"><p>2</p></div>
+                <div id = "button-3" class = "buttons"><p>3</p></div>
+                <div id = "minus" class = "buttons"><p>-</p></div>
+                <div id = "C" class = "buttons"><p>C</p></div>
+                <div id = "button-0" class = "buttons"><p>0</p></div>
+                <div id = "CE" class = "buttons"><p>CE</p></div>
+                <div id = "sum" class = "buttons"><p>=</p></div>
+            </div>
+        </div>
+        <div id = "history">
+            <h1>Historia</h1>
+            <div id = "historycontainer">
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+        let CheckRepeats;
+        let LastArrayButton;
+        let DisplayLastSummary = [];
+        let CountDisplays = [];
+        let DisplayLenght;
+        const GetDictionary = LoadButtonDictionary();
+
+        //Wciśnięcie klawisza wyzwala fukcje sprawdzania.
+        window.onkeyup = function (event) {
+            for (let i = 0; i < 16; i++) {
+                if(event.key.toUpperCase() == GetDictionary[i][2] || (event.key == 'Backspace') || (event.key == 'Enter')) {
+                    ShowPressedNumber(event);
+                    console.log('Found key button in dictionary. Pressed: ' + event.key)
+                    return true;
+                };
+            };
+            console.log('Pressed key button: ' + event.key + ' !');
+        };
+
+        //Ładowanie funkcji po otwarciu strony
+        function init(){
+            LoadListeners();
+            console.log('Loaded Listeners');
+        };
+
+        //Wyświetlanie historii
+        function DisplayHistory(DisplayLastSummary, DisplayString){
+            Checker = DisplayLastSummary.split('');
+            if (Checker.length >= 3) { //Minimalne działanie ma min 3 elementy, sprawdzanie czy nie ma mniejszej liczby
+                document.querySelector('#historycontainer').style.overflow = 'hidden';
+                CountDisplays[CountDisplays.length] = DisplayLastSummary + '=' + DisplayString.outerText;
+                let GetDisplayHistory = document.createElement('p');
+                GetDisplayHistory.setAttribute('id', 'showhistory' + CountDisplays.length);
+                GetDisplayHistory.setAttribute('class', 'showhistory-p');
+                GetDisplayHistory.setAttribute('overflow', 'hidden');
+                GetDisplayHistory.style.position = 'relative';
+                document.querySelector('#historycontainer').insertAdjacentElement('afterbegin', GetDisplayHistory);
+                document.querySelector('.showhistory-p').style.top = -4.5 + 'rem';
+                GetDisplayHistory.innerHTML = CountDisplays[CountDisplays.length - 1];
+                for (let i = CountDisplays.length; i >= 1; i--) {
+                    document.querySelector('#showhistory' + i).animate([
+                    {
+                        top: '-4.5rem'
+                    }, {
+                        top: '0em'
+                    }],
+                    {
+                        duration: 1000,
+                        iteration: 1
+                    });
+                    document.querySelector('#showhistory' + i).style.top = 0 + 'rem';
+                };
+                let CheckHeight = []
+                CheckHeight[0] = 0 + 'rem';
+                CheckHeight[1] = 6.375 + 'rem';
+                CheckHeight[2] = 6.375 + 4.5 * (CountDisplays.length - 1) + 'rem';
+                CheckHeight[3] = 6.375 + 4.5 * (CountDisplays.length - 2) + 'rem';
+                if (CountDisplays.length == 1) {
+                    document.querySelector('#historycontainer').animate([
+                       {
+                          height: CheckHeight[0]
+                       }, {
+                          height: CheckHeight[1]
+                      }],
+                       {
+                          duration: 250,
+                          iteration: 1
+                      });
+                    document.querySelector('#historycontainer').style.height = CheckHeight[1];
+                }
+                else if (CountDisplays.length == 2) {
+                    document.querySelector('#historycontainer').animate([
+                       {
+                          height: CheckHeight[1]
+                       }, {
+                          height: CheckHeight[2]
+                      }],
+                       {
+                          duration: 250,
+                          iteration: 1
+                      });
+                    document.querySelector('#historycontainer').style.height = CheckHeight[2];
+                }
+                else if (CountDisplays.length > 2) {
+                    document.querySelector('#historycontainer').animate([
+                       {
+                          height: CheckHeight[3]
+                       }, {
+                          height: CheckHeight[2]
+                      }],
+                       {
+                          duration: 250,
+                          iteration: 1
+                      });
+                    document.querySelector('#historycontainer').style.height = CheckHeight[2];
+                };
+                document.querySelector('#historycontainer').style.overflow = 'auto';
+                return true;
+            }
+            else
+                return false;
+        }
+
+        //Wyświetlanie wyniku
+        function Display(DisplayString) {
+            if (DisplayString.outerText == '') {
+                console.log('Nothing to return!');
+                return false;
+            }
+            else if (DisplayString.outerText == '-') {
+                console.log('Nothing to return! Single math symbol.');
+                return false;
+            }
+            else {
+                DisplayLastSummary = DisplayString.outerText;
+                //Quick Fix
+                let CheckForZeroAtFront = DisplayLastSummary.split('');
+                for (let i = 0; i < CheckForZeroAtFront.length; i++) {
+                    if(CheckForZeroAtFront[0] == '0'){
+                        CheckForZeroAtFront.shift();
+                        if(CheckForZeroAtFront[0] == '*'){
+                            DisplayString.innerHTML = '0'
+                        }
+                        else
+                            DisplayString.innerHTML = CheckForZeroAtFront.join('');
+                    }
+                    else
+                        break;
+                };
+                //End of quick fix
+                DisplayString.innerHTML = eval(DisplayString.outerText);
+                let CheckLenght = [];
+                CheckLenght[0] = DisplayString.outerText.split('');
+                CheckLenght[1] = DisplayLastSummary.split('');
+                if ((CheckLenght[0].length > 16) || ((CheckLenght[0].length + CheckLenght[1].length) > 16)) {
+                    DisplayString.innerHTML = "Błąd #1 <- Nie obsługiwana długość"
+                    console.warn('Exceeded maximum value!');
+                    return false;
+                }
+                else {
+                    DisplayHistory(DisplayLastSummary, DisplayString);
+                    console.log('Displaying history');
+                    return true;
+                };
+            };
+        }
+
+        //Sprawdzanie powtórzeń
+        function CheckForRepeats(DisplaiedString, PressedButton, Dictionary) {
+            let ArrayString = [];
+            let LoadAssets = [];
+            ArrayString = DisplaiedString.outerText.split('');
+            for (let i = 0; i < Dictionary.length; i++) {
+                LoadAssets[i] = Dictionary[i][2];
+            };
+            if((ArrayString[ArrayString.length - 1] == ArrayString[ArrayString.length - 2]) && (PressedButton > 9)){
+                ArrayString.pop();
+                DisplaiedString.innerHTML = ArrayString.join('');
+                console.log("Detected same math symbol or other symbol after symbol!");
+                return false;
+            };
+            console.log('Nothing is repeating');
+            return true;
+        };
+
+        //Dodawanie wszystkich Listenerów
+        function LoadListeners() {
+            let Dictionary = LoadButtonDictionary();
+            let ButtonsCountNumbers = 0, ButtonsCountWords = 0;
+            let ButtonsNumbers = [], ButtonsWords = [];
+            let ButtonsOther = ["#multiply", "#plus", "#minus", "#C", "#CE", "#sum"];
+            do {
+                //Dodawanie kliknięć do każdego przycisku numerowanego
+                ButtonsNumbers[ButtonsCountNumbers] = document.querySelector('#button-' + "" + ButtonsCountNumbers);
+                ButtonsNumbers[ButtonsCountNumbers].addEventListener('click', ShowPressedNumber);
+                console.log("Added listener to: " + ButtonsCountNumbers);
+                ButtonsCountNumbers++;
+            }
+            while (ButtonsCountNumbers < 10 );
+            do {
+                //Dodawanie kliknięć do każdego przycisku nienumerowanego
+                ButtonsWords[ButtonsCountWords] = document.querySelector(ButtonsOther[ButtonsCountWords]);
+                ButtonsWords[ButtonsCountWords].addEventListener('click', ShowPressedNumber);
+                console.log("Added listener to: " + ButtonsOther[ButtonsCountWords]);
+                ButtonsCountWords++;
+            }
+            while (ButtonsCountWords < 6 );
+            //Zmiana kolorów przy najeżdżaniu
+            let RUp = document.getElementsByClassName("buttons");
+            for (let i = 0; i < RUp.length; i++) {
+                RUp[i].addEventListener('mouseover', (event) => {
+                    RUp[i].style.color = '#E2E2E2';
+                    RUp[i].style.backgroundColor = '#E2E2E2';
+                    RUp[i].childNodes[0].style.color = '#3a4c29';
+                });
+                RUp[i].addEventListener('mouseout', (event) => {
+                    RUp[i].style.color = '';
+                    RUp[i].style.backgroundColor = 'var(--bg-button)';
+                    RUp[i].childNodes[0].style.color = 'black'
+                });
+            };
+            console.log('Loaded mouse events');
+            return {
+                ButtonsNumbers, ButtonsWords
+            };
+        };
+
+        //Słownik id i symboli przypisanych do przycisków
+        function LoadButtonDictionary() {
+            let ButtonID = [], ButtonValue = [], NR = [];
+            let ButtonDictionary = [NR, ButtonID, ButtonValue];
+            let ButtonsOther = ["#multiply", "#plus", "#minus", "#C", "#CE", "#sum"];
+            let ButtonsSymbols = ["*", "+", "-", "C", "CE", "="]
+            let i = 0;
+            do {
+                ButtonDictionary[i] = [NR[i] = i,ButtonID[i] = '#button-' + '' + i, ButtonValue[i] = i]
+                i++;
+            } 
+            while (i < 10);
+            do {
+                ButtonDictionary[i] = [NR[i] = i,ButtonID[i] = ButtonsOther[i - 10], ButtonValue[i] = ButtonsSymbols[i - 10]]
+                i++;
+            } 
+            while (i < 16);
+            console.log('Button dictionary loaded or used.');
+            return ButtonDictionary;
+        };
+
+        //Wyświetlanie numerów na ekranie kalkulatora
+        function ShowPressedNumber(e) {
+            let DisplayElement = document.getElementsByTagName('p')[0];
+            if (DisplayLenght == false) {
+                DisplayElement.innerHTML = '';
+                DisplayLenght = undefined;
+                CheckRepeats = false;
+                console.log('Clearing display');
+            };
+            let ClearLastChar = [];
+            let GetElementID = '#' + e.composedPath()[1].id;
+            console.log
+            if (GetElementID == '#kalkulator-buttons')
+                GetElementID = '#' + e.composedPath()[0].id;
+            else if (GetElementID == '#') {
+                switch (e.key) {
+                    case '+':
+                        GetElementID = '#plus';
+                        break;
+
+                    case '-':
+                        GetElementID = '#minus';
+                        break;
+
+                    case '*':
+                        GetElementID = '#multiply';
+                        break;
+
+                    case '=':
+                        GetElementID = '#sum';
+                        break;
+
+                    case '=':
+                        GetElementID = '#sum';
+                        break;
+
+                    case 'Enter':
+                        GetElementID = '#sum';
+                        break;
+
+                    case 'Backspace':
+                        GetElementID = '#CE';
+                        break;
+                
+                    default:
+                        GetElementID = '#button-' + e.key;
+                        break;
+                };
+            };
+            //Przeszukiwanie słownika cyfr i symboli
+            let GetArray = GetDictionary.map(x => x[1]).findIndex(ID => ID === GetElementID);
+            //Sprawdzanie czy ostatni element nie był równaniem
+            if (GetArray == 13) {//Czyszczenie ekranu
+                DisplayElement.innerHTML = '';
+                LastArrayButton = 13;
+                CheckRepeats = undefined;
+                console.log('Clearing display');
+                return true;
+            }
+            else if (GetArray == 14) {//Czyszczenie ostatniego elementu
+                ClearLastChar = DisplayElement.outerText.split('');
+                ClearLastChar.pop();
+                console.log('Clearing last element');
+                switch (ClearLastChar[ClearLastChar.length - 1]) {
+                    case '*':
+                        LastArrayButton = '10';
+                        break;
+                    case '+':
+                        LastArrayButton = '11';
+                        break;
+                    case '-':
+                        LastArrayButton = '12';
+                        break;
+                    case '=':
+                        LastArrayButton = '15';
+                        break;
+                    default:
+                        LastArrayButton = ClearLastChar[ClearLastChar.length - 1];
+                        break;
+                };
+                DisplayElement.innerHTML = ClearLastChar.join('');
+                return true;
+            }
+            else if (GetArray == 15) { //Zakończenie działania
+                DisplayLenght = Display(DisplayElement);
+                LastArrayButton = 15;
+                CheckRepeats = undefined;
+                console.log('Pressed summary button, returned math value');
+                return DisplayLenght;
+            };
+            //Sprawdzanie czy ostatni element nie był symbolem
+            if (((LastArrayButton > 9) || (LastArrayButton == undefined)) && (LastArrayButton != 15)) {
+                console.log('Last element was symbol. Toggling last symbol state');
+                CheckRepeats = false;
+            };
+            //Sprawdzanie powtórzeń oraz jakie symbole i numery zostały wciśnięte
+            switch (CheckRepeats) {
+                case true:
+                    DisplayElement.innerHTML += GetDictionary[GetArray][2];
+                    CheckRepeats = CheckForRepeats(DisplayElement, GetArray, GetDictionary);
+                    LastArrayButton = GetArray;
+                    break;
+
+                case false:
+                    if ((GetArray > 9) && (GetArray == 12)){
+                        DisplayElement.innerHTML += GetDictionary[GetArray][2];
+                        CheckRepeats = CheckForRepeats(DisplayElement, GetArray, GetDictionary);
+                        break;
+                    }
+                    else if (GetArray > 9){
+                        CheckRepeats = CheckForRepeats(DisplayElement, GetArray, GetDictionary);
+                        break;
+                    } 
+                    else if (GetArray <= 9) {
+                        DisplayElement.innerHTML += GetDictionary[GetArray][2];
+                        CheckRepeats = CheckForRepeats(DisplayElement, GetArray, GetDictionary);
+                        LastArrayButton = GetArray;
+                        break;
+                    };
+            
+                default:
+                    if ((GetArray > 9) && (GetArray == 12)){
+                        DisplayElement.innerHTML += GetDictionary[GetArray][2];
+                        LastArrayButton = GetArray;
+                        break;
+                    }
+                    else if ((GetArray <= 9) || ((LastArrayButton == 15) && (GetArray > 9)) ) {
+                        DisplayElement.innerHTML += GetDictionary[GetArray][2];
+                        CheckRepeats = CheckForRepeats(DisplayElement, GetArray, GetDictionary);
+                        LastArrayButton = GetArray;
+                        break;
+                    }
+                    else if (GetArray > 9){
+                        CheckRepeats = CheckForRepeats(DisplayElement, GetArray, GetDictionary);
+                        LastArrayButton = GetArray;
+                        break;
+                    };
+            };
+        };
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</html>
