@@ -168,8 +168,8 @@
                         break;
                 };
                 //End of quick fix
-                DisplayString.innerHTML = eval(DisplayString.outerText);
-                let CheckLenght = [];
+                DisplayString.innerHTML = eval(DisplayString.outerText); //Funkcja eval może powodować wstrzyknięcie złośliwego kodu. Należałoby wyeliminować eval lub dodać fukcję sprawdzającą (np JSON.parse(), JSON.strigfy()).
+                const CheckLenght = [];
                 CheckLenght[0] = DisplayString.outerText.split('');
                 CheckLenght[1] = DisplayLastSummary.split('');
                 if ((CheckLenght[0].length > 16) || ((CheckLenght[0].length + CheckLenght[1].length) > 16)) {
