@@ -13,22 +13,22 @@
         <div id = "kalkulator">
             <p id = "showresult"></p>
             <div id = "kalkulator-buttons">
-                <div id = "button-7" class = "buttons"><p>7</p></div>
-                <div id = "button-8" class = "buttons"><p>8</p></div>
-                <div id = "button-9" class = "buttons"><p>9</p></div>
-                <div id = "multiply" class = "buttons"><p>*</p></div>
-                <div id = "button-4" class = "buttons"><p>4</p></div>
-                <div id = "button-5" class = "buttons"><p>5</p></div>
-                <div id = "button-6" class = "buttons"><p>6</p></div>
-                <div id = "plus" class = "buttons"><p>+</p></div>
-                <div id = "button-1" class = "buttons"><p>1</p></div>
-                <div id = "button-2" class = "buttons"><p>2</p></div>
-                <div id = "button-3" class = "buttons"><p>3</p></div>
-                <div id = "minus" class = "buttons"><p>-</p></div>
-                <div id = "C" class = "buttons"><p>C</p></div>
-                <div id = "button-0" class = "buttons"><p>0</p></div>
-                <div id = "CE" class = "buttons"><p>CE</p></div>
-                <div id = "sum" class = "buttons"><p>=</p></div>
+                <div id = "button-7" class = "buttons digit"><p>7</p></div>
+                <div id = "button-8" class = "buttons digit"><p>8</p></div>
+                <div id = "button-9" class = "buttons digit"><p>9</p></div>
+                <div id = "multiply" class = "buttons operator"><p>*</p></div>
+                <div id = "button-4" class = "buttons digit"><p>4</p></div>
+                <div id = "button-5" class = "buttons digit"><p>5</p></div>
+                <div id = "button-6" class = "buttons digit"><p>6</p></div>
+                <div id = "plus" class = "buttons operator"><p>+</p></div>
+                <div id = "button-1" class = "buttons digit"><p>1</p></div>
+                <div id = "button-2" class = "buttons digit"><p>2</p></div>
+                <div id = "button-3" class = "buttons digit"><p>3</p></div>
+                <div id = "minus" class = "buttons operator"><p>-</p></div>
+                <div id = "C" class = "buttons operator"><p>C</p></div>
+                <div id = "button-0" class = "buttons digit"><p>0</p></div>
+                <div id = "CE" class = "buttons operator"><p>CE</p></div>
+                <div id = "sum" class = "buttons operator"><p>=</p></div>
             </div>
         </div>
         <div id = "history">
@@ -41,9 +41,9 @@
         let CheckRepeats;
         let LastArrayButton;
         let DisplayLastSummary = [];
-        let CountDisplays = [];
+        const CountDisplays = [];
         let DisplayLenght;
-        const GetDictionary = LoadButtonDictionary();
+        let GetDictionary = LoadButtonDictionary();
 
         //Wciśnięcie klawisza wyzwala fukcje sprawdzania.
         window.onkeyup = function (event) {
@@ -169,7 +169,7 @@
                 };
                 //End of quick fix
                 DisplayString.innerHTML = eval(DisplayString.outerText);
-                let CheckLenght = [];
+                const CheckLenght = [];
                 CheckLenght[0] = DisplayString.outerText.split('');
                 CheckLenght[1] = DisplayLastSummary.split('');
                 if ((CheckLenght[0].length > 16) || ((CheckLenght[0].length + CheckLenght[1].length) > 16)) {
@@ -187,9 +187,8 @@
 
         //Sprawdzanie powtórzeń
         function CheckForRepeats(DisplaiedString, PressedButton, Dictionary) {
-            let ArrayString = [];
-            let LoadAssets = [];
-            ArrayString = DisplaiedString.outerText.split('');
+            const LoadAssets = [];
+            const ArrayString = DisplaiedString.outerText.split('');
             for (let i = 0; i < Dictionary.length; i++) {
                 LoadAssets[i] = Dictionary[i][2];
             };
@@ -205,52 +204,19 @@
 
         //Dodawanie wszystkich Listenerów
         function LoadListeners() {
-            let Dictionary = LoadButtonDictionary();
-            let ButtonsCountNumbers = 0, ButtonsCountWords = 0;
-            let ButtonsNumbers = [], ButtonsWords = [];
-            let ButtonsOther = ["#multiply", "#plus", "#minus", "#C", "#CE", "#sum"];
-            do {
-                //Dodawanie kliknięć do każdego przycisku numerowanego
-                ButtonsNumbers[ButtonsCountNumbers] = document.querySelector('#button-' + "" + ButtonsCountNumbers);
-                ButtonsNumbers[ButtonsCountNumbers].addEventListener('click', ShowPressedNumber);
-                console.log("Added listener to: " + ButtonsCountNumbers);
-                ButtonsCountNumbers++;
-            }
-            while (ButtonsCountNumbers < 10 );
-            do {
-                //Dodawanie kliknięć do każdego przycisku nienumerowanego
-                ButtonsWords[ButtonsCountWords] = document.querySelector(ButtonsOther[ButtonsCountWords]);
-                ButtonsWords[ButtonsCountWords].addEventListener('click', ShowPressedNumber);
-                console.log("Added listener to: " + ButtonsOther[ButtonsCountWords]);
-                ButtonsCountWords++;
-            }
-            while (ButtonsCountWords < 6 );
-            //Zmiana kolorów przy najeżdżaniu
-            let RUp = document.getElementsByClassName("buttons");
-            for (let i = 0; i < RUp.length; i++) {
-                RUp[i].addEventListener('mouseover', (event) => {
-                    RUp[i].style.color = '#E2E2E2';
-                    RUp[i].style.backgroundColor = '#E2E2E2';
-                    RUp[i].childNodes[0].style.color = '#3a4c29';
-                });
-                RUp[i].addEventListener('mouseout', (event) => {
-                    RUp[i].style.color = '';
-                    RUp[i].style.backgroundColor = 'var(--bg-button)';
-                    RUp[i].childNodes[0].style.color = 'black'
-                });
-            };
+            const Digits = document.querySelectorAll('.digit');
+            const Operators = document.querySelectorAll('.operator');
+            Digits.forEach((el) => {el.addEventListener('click', ShowPressedNumber);});
+            Operators.forEach((el) => {el.addEventListener('click', ShowPressedNumber);});
             console.log('Loaded mouse events');
-            return {
-                ButtonsNumbers, ButtonsWords
-            };
         };
 
         //Słownik id i symboli przypisanych do przycisków
         function LoadButtonDictionary() {
-            let ButtonID = [], ButtonValue = [], NR = [];
-            let ButtonDictionary = [NR, ButtonID, ButtonValue];
-            let ButtonsOther = ["#multiply", "#plus", "#minus", "#C", "#CE", "#sum"];
-            let ButtonsSymbols = ["*", "+", "-", "C", "CE", "="]
+            const ButtonID = [], ButtonValue = [], NR = [];
+            const ButtonDictionary = [NR, ButtonID, ButtonValue];
+            const ButtonsOther = ["#multiply", "#plus", "#minus", "#C", "#CE", "#sum"];
+            const ButtonsSymbols = ["*", "+", "-", "C", "CE", "="]
             let i = 0;
             do {
                 ButtonDictionary[i] = [NR[i] = i,ButtonID[i] = '#button-' + '' + i, ButtonValue[i] = i]
@@ -275,7 +241,6 @@
                 CheckRepeats = false;
                 console.log('Clearing display');
             };
-            let ClearLastChar = [];
             let GetElementID = '#' + e.composedPath()[1].id;
             console.log
             if (GetElementID == '#kalkulator-buttons')
@@ -326,7 +291,7 @@
                 return true;
             }
             else if (GetArray == 14) {//Czyszczenie ostatniego elementu
-                ClearLastChar = DisplayElement.outerText.split('');
+                const ClearLastChar = DisplayElement.outerText.split('');
                 ClearLastChar.pop();
                 console.log('Clearing last element');
                 switch (ClearLastChar[ClearLastChar.length - 1]) {

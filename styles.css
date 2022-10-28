@@ -96,6 +96,10 @@ body {
     text-align: center;
 }
 
+.buttons:hover {
+    background-color: #E2E2E2;
+}
+
 .buttons p {
     font-size: 4.75em;
     height: 1.15em;
@@ -105,6 +109,11 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    color: var(--bg-border);
+}
+
+.buttons:hover p {
+    color: var(--bg-color);
 }
 
 #history {
